@@ -2,48 +2,66 @@ import { useRef, useState, useEffect, useCallback, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SvgSparkle, SvgRose } from './Assets'
-import useGyroscope from '../hooks/useGyroscope'
 import styles from './Gallery3D.module.css'
 import { PHOTOS } from '../data/photos'
 
-// 3D Background Particles with Gyroscope Camera Movement
-function Background3DParticles({ tiltX = 0, tiltY = 0 }) {
-  const meshRef = useRef()
-  const count = 90
-  const positions = useRef(
-    new Float32Array(count * 3).map((_, i) =>
-      i % 3 === 2 ? (Math.random() - 0.5) * 6 : (Math.random() - 0.5) * 10
-    )
+// 3D Floating Volumetric Crystals & Particles Canvas
+function Floating3DCrystals() {
+  const groupRef = useRef()
+  const crystalRefs = useRef([])
+
+  // Generate 3D crystal data
+  const crystals = useRef(
+    Array.from({ length: 18 }, (_, i) => ({
+      id: i,
+      position: [
+        (Math.random() - 0.5) * 8,
+        (Math.random() - 0.5) * 6,
+        (Math.random() - 0.5) * 4 - 1,
+      ],
+      rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0],
+      scale: 0.12 + Math.random() * 0.18,
+      speedX: (Math.random() - 0.5) * 0.015,
+      speedY: 0.005 + Math.random() * 0.01,
+      rotSpeed: (Math.random() - 0.5) * 0.02,
+      color: i % 2 === 0 ? '#FFD700' : '#800020',
+    }))
   )
 
   useFrame((state) => {
-    if (!meshRef.current) return
-    // Smooth ambient rotation
-    meshRef.current.rotation.y = state.clock.elapsedTime * 0.04
-    meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.03) * 0.05
+    if (!groupRef.current) return
+    groupRef.current.rotation.y = state.clock.elapsedTime * 0.03
 
-    // Smooth camera depth reaction to gyroscope tilt
-    state.camera.position.x += (tiltX * 0.8 - state.camera.position.x) * 0.08
-    state.camera.position.y += (-tiltY * 0.6 - state.camera.position.y) * 0.08
-    state.camera.lookAt(0, 0, 0)
+    crystalRefs.current.forEach((mesh, idx) => {
+      if (!mesh) return
+      const c = crystals.current[idx]
+      mesh.rotation.x += c.rotSpeed
+      mesh.rotation.y += c.rotSpeed * 0.8
+      mesh.position.y += Math.sin(state.clock.elapsedTime * 0.8 + c.id) * 0.002
+    })
   })
 
   return (
-    <points ref={meshRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions.current, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.07}
-        color="#FFD700"
-        transparent
-        opacity={0.65}
-        sizeAttenuation
-      />
-    </points>
+    <group ref={groupRef}>
+      {crystals.current.map((c, i) => (
+        <mesh
+          key={c.id}
+          ref={(el) => (crystalRefs.current[i] = el)}
+          position={c.position}
+          rotation={c.rotation}
+          scale={[c.scale, c.scale, c.scale]}
+        >
+          <octahedronGeometry args={[1, 0]} />
+          <meshStandardMaterial
+            color={c.color}
+            metalness={0.8}
+            roughness={0.2}
+            emissive={c.color}
+            emissiveIntensity={0.2}
+          />
+        </mesh>
+      ))}
+    </group>
   )
 }
 
@@ -53,8 +71,6 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
   const [windowWidth, setWindowWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 800))
   const isCooldown = useRef(false)
   const touchStartPos = useRef(0)
-
-  const { tiltX, tiltY } = useGyroscope()
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
@@ -127,14 +143,15 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
 
   return (
     <div id="gallery-page-container" className={styles.stickyInner}>
-      {/* 3D Canvas Background driven by Gyroscope */}
+      {/* Volumetric 3D Floating Crystals Background Canvas */}
       {isActive && (
         <div className={styles.canvasContainer}>
-          <Canvas camera={{ position: [0, 0, 5], fov: 50 }} gl={{ alpha: true, antialias: false, powerPreference: 'low-power' }}>
+          <Canvas camera={{ position: [0, 0, 5], fov: 50 }} gl={{ alpha: true, antialias: true }}>
             <Suspense fallback={null}>
-              <ambientLight intensity={0.4} />
-              <pointLight position={[2, 3, 4]} intensity={1.2} color="#FFFFFF" />
-              <Background3DParticles tiltX={tiltX} tiltY={tiltY} />
+              <ambientLight intensity={0.6} />
+              <pointLight position={[3, 4, 5]} intensity={1.5} color="#FFD700" />
+              <pointLight position={[-3, -2, 3]} intensity={1.2} color="#800020" />
+              <Floating3DCrystals />
             </Suspense>
           </Canvas>
         </div>
@@ -176,9 +193,9 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
         </span>
       </div>
 
-      {/* Track Viewport */}
+      {/* 3D Track Viewport */}
       <div className={styles.trackViewport}>
-        {/* Navigation Arrows for Mobile & Touch */}
+        {/* Navigation Arrows */}
         {photoIndex > 0 && (
           <button
             className={styles.navArrowLeft}
@@ -207,19 +224,24 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
           {PHOTOS.map((photo, index) => {
             const isCentered = index === photoIndex
             const dist = index - photoIndex
-            const rotateY = dist * -22
-            const scale = isCentered ? 1.08 : Math.max(0.8, 1 - Math.abs(dist) * 0.15)
-            const opacity = isCentered ? 1 : Math.max(0.4, 1 - Math.abs(dist) * 0.3)
+
+            // Real 3D Cover Flow Arc Z-Depth Parameters
+            const rotateY = dist * -28
+            const translateZ = isCentered ? 60 : -Math.abs(dist) * 110
+            const translateY = Math.abs(dist) * 14
+            const scale = isCentered ? 1.12 : Math.max(0.72, 1 - Math.abs(dist) * 0.18)
+            const opacity = isCentered ? 1 : Math.max(0.35, 1 - Math.abs(dist) * 0.3)
 
             return (
               <motion.div
                 key={photo.id}
                 className={`${styles.card3d} ${isCentered ? styles.cardActive : ''}`}
                 style={{
-                  transform: `perspective(1000px) rotateY(${rotateY + (isCentered ? tiltX * 3 : 0)}deg) rotateX(${isCentered ? -tiltY * 3 : 0}deg) scale(${scale})`,
+                  transform: `perspective(1100px) rotateY(${rotateY}deg) translate3d(0, ${translateY}px, ${translateZ}px) scale(${scale})`,
                   opacity,
+                  zIndex: isCentered ? 50 : 30 - Math.abs(dist),
                 }}
-                whileHover={isCentered ? { scale: scale * 1.04 } : {}}
+                whileHover={isCentered ? { scale: scale * 1.05 } : {}}
                 whileTap={isCentered ? { scale: 0.96 } : {}}
                 onClick={() => {
                   if (isCentered) setSelectedPhoto(photo)
@@ -227,17 +249,12 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
                 }}
               >
                 <div className={styles.cardFrame}>
+                  <div className={styles.cardGlassGlare} />
                   <div className={styles.photoContainer}>
                     <img
                       src={photo.src}
                       alt={`Foto #${photo.id}`}
                       className={styles.photoImg}
-                      style={{
-                        transform: isCentered
-                          ? `scale(1.08) translate3d(${tiltX * -10}px, ${tiltY * -10}px, 0)`
-                          : 'scale(1)',
-                        transition: 'transform 0.15s ease-out',
-                      }}
                       loading="lazy"
                       onError={(e) => {
                         e.target.style.display = 'none'
@@ -255,9 +272,9 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
                   </div>
 
                   <div className={styles.cardCleanFooter}>
-                    <SvgSparkle size={18} color="#FFFFFF" />
+                    <SvgSparkle size={18} color="#FFD700" />
                     <button className={styles.inspectBtn}>
-                      Perbesar
+                      Perbesar ✦
                     </button>
                   </div>
                 </div>
