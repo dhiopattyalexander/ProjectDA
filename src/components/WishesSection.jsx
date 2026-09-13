@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { SvgEnvelope, SvgRose, SvgHeart } from './Assets'
+import useGyroscope from '../hooks/useGyroscope'
 import styles from './WishesSection.module.css'
 
 const LETTER_PARAGRAPHS = [
@@ -77,6 +78,7 @@ export default function WishesSection({ isActive = false }) {
   const [activeLine, setActiveLine] = useState(0)
   const [showAll, setShowAll] = useState(false)
   const sectionRef = useRef(null)
+  const { tiltX, tiltY, shakeX, shakeY } = useGyroscope()
 
   useEffect(() => {
     if (isActive && !visible) {
@@ -109,9 +111,13 @@ export default function WishesSection({ isActive = false }) {
         </h2>
       </motion.div>
 
-      {/* Letter Card */}
+      {/* Letter Card with Gyro Parallax Tilt */}
       <motion.div
         className={styles.letterCard}
+        style={{
+          transform: `perspective(900px) rotateY(${tiltX * 7 + shakeX * 5}deg) rotateX(${-tiltY * 5 - shakeY * 5}deg)`,
+          transition: 'transform 0.15s ease-out',
+        }}
         initial={{ opacity: 0, y: 40, scale: 0.97 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}

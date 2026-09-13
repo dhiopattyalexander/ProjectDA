@@ -6,6 +6,7 @@ import Gallery3D from './components/Gallery3D'
 import WishesSection from './components/WishesSection'
 import ClosingSection from './components/ClosingSection'
 import { SvgSparkle, SvgRose, SvgEnvelope, SvgCandle } from './components/Assets'
+import useGyroscope from './hooks/useGyroscope'
 import './index.css'
 
 const PAGES = [
@@ -21,6 +22,8 @@ export default function App() {
   const [galleryPhotoIndex, setGalleryPhotoIndex] = useState(0)
   const isTransitioning = useRef(false)
   const touchStartPos = useRef(0)
+
+  const { tiltX, tiltY, shakeX, shakeY } = useGyroscope()
 
   const goToPage = useCallback((targetIndex, initialPhoto = 0) => {
     if (targetIndex < 0 || targetIndex >= PAGES.length) return
@@ -84,12 +87,23 @@ export default function App() {
     }
   }, [unlocked, pageIndex, goToPage])
 
+  const globalRotateY = tiltX * 5 + shakeX * 4
+  const globalRotateX = -tiltY * 4 - shakeY * 4
+  const globalTranslateX = tiltX * 6 + shakeX * 10
+  const globalTranslateY = tiltY * 6 + shakeY * 10
+
   return (
     <div className="app-viewport">
       {!unlocked ? (
         <LockScreen onUnlock={() => setUnlocked(true)} />
       ) : (
-        <div className="page-slider-container">
+        <div
+          className="page-slider-container"
+          style={{
+            transform: `perspective(1000px) rotateY(${globalRotateY}deg) rotateX(${globalRotateX}deg) translate3d(${globalTranslateX}px, ${globalTranslateY}px, 0)`,
+            transition: (shakeX !== 0 || shakeY !== 0) ? 'transform 0.1s cubic-bezier(0.1, 0.9, 0.2, 1.2)' : 'transform 0.15s ease-out',
+          }}
+        >
           {/* Stacked Paper Layers System */}
           {PAGES.map((page, index) => {
             const isCoveredBelow = index < pageIndex
