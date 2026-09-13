@@ -13,8 +13,8 @@ function Petal({ style }) {
 }
 
 function SlidingPhotoCollage() {
-  const row1Photos = [...PHOTOS, ...PHOTOS, ...PHOTOS]
-  const row2Photos = [...PHOTOS].reverse().concat([...PHOTOS].reverse(), [...PHOTOS].reverse())
+  const row1Photos = [...PHOTOS, ...PHOTOS]
+  const row2Photos = [...PHOTOS].reverse().concat([...PHOTOS].reverse())
 
   return (
     <div className={styles.collageBg}>

@@ -73,7 +73,6 @@ function JellyDraggable({
 
 function PhysicsHammer({ onCollisionCheck }) {
   const hammerRef = useRef(null)
-  const [pos, setPos] = useState({ x: 40, y: 120 })
   const physicsRef = useRef({
     x: 50,
     y: 120,
@@ -134,7 +133,14 @@ function PhysicsHammer({ onCollisionCheck }) {
           p.vx = -Math.abs(p.vx) * BOUNCE
         }
 
-        setPos({ x: p.x, y: p.y })
+        // Direct DOM transform mutation (0 React re-renders)
+        if (hammerRef.current) {
+          const skewX = Math.max(-25, Math.min(25, p.vx * 0.6))
+          const scaleY = 1 - Math.min(0.2, Math.abs(p.vy) * 0.012)
+          hammerRef.current.style.left = `${p.x}px`
+          hammerRef.current.style.top = `${p.y}px`
+          hammerRef.current.style.transform = `rotate(${p.rot}deg) skewX(${skewX}deg) scaleY(${scaleY})`
+        }
       }
 
       animId = requestAnimationFrame(updatePhysics)
@@ -170,7 +176,14 @@ function PhysicsHammer({ onCollisionCheck }) {
     p.y = clientY - p.dragStart.y
 
     p.lastMouse = { x: clientX, y: clientY, time: now }
-    setPos({ x: p.x, y: p.y })
+
+    if (hammerRef.current) {
+      const skewX = Math.max(-25, Math.min(25, p.vx * 0.6))
+      const scaleY = 1 - Math.min(0.2, Math.abs(p.vy) * 0.012)
+      hammerRef.current.style.left = `${p.x}px`
+      hammerRef.current.style.top = `${p.y}px`
+      hammerRef.current.style.transform = `rotate(${p.rot}deg) skewX(${skewX}deg) scaleY(${scaleY})`
+    }
 
     if (onCollisionCheck) {
       onCollisionCheck(clientX, clientY)
@@ -209,8 +222,8 @@ function PhysicsHammer({ onCollisionCheck }) {
       className={styles.hammer}
       style={{
         position: 'absolute',
-        left: `${pos.x}px`,
-        top: `${pos.y}px`,
+        left: `${p.x}px`,
+        top: `${p.y}px`,
         transform: `rotate(${p.rot}deg) skewX(${skewX}deg) scaleY(${scaleY})`,
         zIndex: 15,
         cursor: p.isDragging ? 'grabbing' : 'grab',
@@ -258,12 +271,12 @@ function useCountdown() {
 
 function DVDBouncingPhotos({ tiltX = 0, tiltY = 0 }) {
   const containerRef = useRef(null)
+  const cardRefs = useRef([])
   const itemsRef = useRef([
     { id: 1, src: PHOTOS[0].src, title: PHOTOS[0].title, accentColor: PHOTOS[0].accentColor, x: 40, y: 70, vx: 1.5, vy: 1.2, rot: -4 },
     { id: 2, src: PHOTOS[2].src, title: PHOTOS[2].title, accentColor: PHOTOS[2].accentColor, x: 200, y: 220, vx: -1.3, vy: 1.6, rot: 5 },
     { id: 3, src: PHOTOS[4].src, title: PHOTOS[4].title, accentColor: PHOTOS[4].accentColor, x: 100, y: 380, vx: 1.6, vy: -1.4, rot: -2 },
   ])
-  const [positions, setPositions] = useState(() => itemsRef.current.map(item => ({ x: item.x, y: item.y, rot: item.rot })))
 
   const gyroRef = useRef({ tiltX, tiltY })
   useEffect(() => {
@@ -284,7 +297,7 @@ function DVDBouncingPhotos({ tiltX = 0, tiltY = 0 }) {
 
         const { tiltX, tiltY } = gyroRef.current
 
-        itemsRef.current.forEach((item) => {
+        itemsRef.current.forEach((item, idx) => {
           // Accelerate based on gyroscope tilt
           item.vx += tiltX * 0.05
           item.vy += tiltY * 0.05
@@ -323,9 +336,13 @@ function DVDBouncingPhotos({ tiltX = 0, tiltY = 0 }) {
             item.y = maxY - 10
             item.vy = -Math.abs(item.vy)
           }
-        })
 
-        setPositions(itemsRef.current.map(item => ({ x: item.x, y: item.y, rot: item.rot })))
+          // Direct DOM transform mutation (0 React re-renders)
+          const el = cardRefs.current[idx]
+          if (el) {
+            el.style.transform = `translate3d(${item.x}px, ${item.y}px, 0) rotate(${item.rot}deg)`
+          }
+        })
       }
       animId = requestAnimationFrame(update)
     }
@@ -336,23 +353,21 @@ function DVDBouncingPhotos({ tiltX = 0, tiltY = 0 }) {
 
   return (
     <div ref={containerRef} className={styles.dvdLayer}>
-      {itemsRef.current.map((item, idx) => {
-        const pos = positions[idx] || { x: item.x, y: item.y, rot: item.rot }
-        return (
-          <div
-            key={item.id}
-            className={styles.dvdCard}
-            style={{
-              transform: `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${pos.rot}deg)`,
-              '--accentColor': item.accentColor,
-            }}
-          >
-            <div className={styles.dvdImgWrapper}>
-              <img src={item.src} alt="Photo" className={styles.dvdImg} draggable={false} />
-            </div>
+      {itemsRef.current.map((item, idx) => (
+        <div
+          key={item.id}
+          ref={(el) => (cardRefs.current[idx] = el)}
+          className={styles.dvdCard}
+          style={{
+            transform: `translate3d(${item.x}px, ${item.y}px, 0) rotate(${item.rot}deg)`,
+            '--accentColor': item.accentColor,
+          }}
+        >
+          <div className={styles.dvdImgWrapper}>
+            <img src={item.src} alt="Photo" className={styles.dvdImg} draggable={false} />
           </div>
-        )
-      })}
+        </div>
+      ))}
     </div>
   )
 }

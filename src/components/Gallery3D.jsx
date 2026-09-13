@@ -40,7 +40,7 @@ function Background3DParticles() {
   )
 }
 
-export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 0 }) {
+export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 0, isActive = false }) {
   const [photoIndex, setPhotoIndex] = useState(initialPhotoIndex)
   const [selectedPhoto, setSelectedPhoto] = useState(null)
   const [windowWidth, setWindowWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 800))
@@ -118,15 +118,18 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
 
   return (
     <div id="gallery-page-container" className={styles.stickyInner}>
-      <div className={styles.canvasContainer}>
-        <Canvas camera={{ position: [0, 0, 5], fov: 50 }} gl={{ alpha: true, antialias: true }}>
-          <Suspense fallback={null}>
-            <ambientLight intensity={0.4} />
-            <pointLight position={[2, 3, 4]} intensity={1.2} color="#FFFFFF" />
-            <Background3DParticles />
-          </Suspense>
-        </Canvas>
-      </div>
+      {/* 3D Canvas - Only active when Gallery page is currently open */}
+      {isActive && (
+        <div className={styles.canvasContainer}>
+          <Canvas camera={{ position: [0, 0, 5], fov: 50 }} gl={{ alpha: true, antialias: false, powerPreference: 'low-power' }}>
+            <Suspense fallback={null}>
+              <ambientLight intensity={0.4} />
+              <pointLight position={[2, 3, 4]} intensity={1.2} color="#FFFFFF" />
+              <Background3DParticles />
+            </Suspense>
+          </Canvas>
+        </div>
+      )}
 
       <div className={styles.header}>
         <motion.p

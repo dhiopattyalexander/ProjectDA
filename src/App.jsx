@@ -128,6 +128,7 @@ export default function App() {
                     initialPhotoIndex={galleryPhotoIndex}
                     onNextPage={() => goToPage(2, 0)}
                     onPrevPage={() => goToPage(0, 0)}
+                    isActive={isCurrentPage}
                   />
                 )}
 
