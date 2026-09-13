@@ -35,8 +35,14 @@ const LETTER_PARAGRAPHS = [
 ]
 
 // Pure Letter-by-Letter Single Character Typewriter Component
-function SingleCharTypewriter({ text, isActive, isDone, onComplete, speed = 32 }) {
-  const [charCount, setCharCount] = useState(0)
+function SingleCharTypewriter({ text, isActive, isDone, onComplete, speed = 28 }) {
+  const [charCount, setCharCount] = useState(isDone ? text.length : 0)
+  const onCompleteRef = useRef(onComplete)
+
+  // Keep ref updated to latest callback without triggering effect re-run
+  useEffect(() => {
+    onCompleteRef.current = onComplete
+  }, [onComplete])
 
   useEffect(() => {
     if (isDone) {
@@ -55,15 +61,17 @@ function SingleCharTypewriter({ text, isActive, isDone, onComplete, speed = 32 }
       setCharCount(current)
       if (current >= text.length) {
         clearInterval(timer)
-        setTimeout(() => onComplete?.(), 300)
+        setTimeout(() => {
+          onCompleteRef.current?.()
+        }, 250)
       }
     }, speed)
 
     return () => clearInterval(timer)
-  }, [isActive, isDone, text, speed, onComplete])
+  }, [isActive, isDone, text, speed])
 
   const visibleText = text.slice(0, charCount)
-  const isTypingHere = isActive && charCount < text.length
+  const isTypingHere = isActive && !isDone && charCount < text.length
 
   return (
     <span className={styles.typeText}>
