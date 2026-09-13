@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { SvgRose, SvgSparkle, SvgHeart, SvgCandle } from './Assets'
+import useGyroscope from '../hooks/useGyroscope'
 import { PHOTOS } from '../data/photos'
 import styles from './ClosingSection.module.css'
 
@@ -54,6 +55,7 @@ export default function ClosingSection() {
   const [petals, setPetals] = useState([])
   const sectionRef = useRef(null)
   const triggered = useRef(false)
+  const { tiltX, tiltY } = useGyroscope()
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -128,9 +130,13 @@ export default function ClosingSection() {
         ))}
       </motion.div>
 
-      {/* Main wish */}
+      {/* Main wish with 3D Gyro Perspective */}
       <motion.div
         className={styles.mainWish}
+        style={{
+          transform: `perspective(900px) rotateY(${tiltX * 12}deg) rotateX(${-tiltY * 10}deg)`,
+          transition: 'transform 0.12s ease-out',
+        }}
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}

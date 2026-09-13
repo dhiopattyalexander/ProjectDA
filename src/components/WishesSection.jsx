@@ -86,7 +86,7 @@ export default function WishesSection({ isActive = false }) {
   const [activeLine, setActiveLine] = useState(0)
   const [showAll, setShowAll] = useState(false)
   const sectionRef = useRef(null)
-  const { tiltX, tiltY, shakeX, shakeY } = useGyroscope()
+  const { tiltX, tiltY } = useGyroscope()
 
   useEffect(() => {
     if (isActive && !visible) {
@@ -103,9 +103,13 @@ export default function WishesSection({ isActive = false }) {
       <div className={styles.bgDeco2} />
       <div className="noise-overlay" />
 
-      {/* Header */}
+      {/* Header with 3D Gyro Tilt */}
       <motion.div
         className={styles.header}
+        style={{
+          transform: `perspective(800px) rotateY(${tiltX * 10}deg) rotateX(${-tiltY * 8}deg)`,
+          transition: 'transform 0.1s ease-out',
+        }}
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
@@ -123,8 +127,8 @@ export default function WishesSection({ isActive = false }) {
       <motion.div
         className={styles.letterCard}
         style={{
-          transform: `perspective(900px) rotateY(${tiltX * 7 + shakeX * 5}deg) rotateX(${-tiltY * 5 - shakeY * 5}deg)`,
-          transition: 'transform 0.15s ease-out',
+          transform: `perspective(900px) rotateY(${tiltX * 12}deg) rotateX(${-tiltY * 10}deg)`,
+          transition: 'transform 0.12s ease-out',
         }}
         initial={{ opacity: 0, y: 40, scale: 0.97 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}

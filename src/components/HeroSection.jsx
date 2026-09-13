@@ -269,7 +269,7 @@ function useCountdown() {
   return state
 }
 
-function DVDBouncingPhotos({ tiltX = 0, tiltY = 0, shakeX = 0, shakeY = 0 }) {
+function DVDBouncingPhotos({ tiltX = 0, tiltY = 0 }) {
   const containerRef = useRef(null)
   const cardRefs = useRef([])
   const itemsRef = useRef([
@@ -278,10 +278,10 @@ function DVDBouncingPhotos({ tiltX = 0, tiltY = 0, shakeX = 0, shakeY = 0 }) {
     { id: 3, src: PHOTOS[4].src, title: PHOTOS[4].title, accentColor: PHOTOS[4].accentColor, x: 100, y: 380, vx: 1.6, vy: -1.4, rot: -2 },
   ])
 
-  const gyroRef = useRef({ tiltX, tiltY, shakeX, shakeY })
+  const gyroRef = useRef({ tiltX, tiltY })
   useEffect(() => {
-    gyroRef.current = { tiltX, tiltY, shakeX, shakeY }
-  }, [tiltX, tiltY, shakeX, shakeY])
+    gyroRef.current = { tiltX, tiltY }
+  }, [tiltX, tiltY])
 
   useEffect(() => {
     let animId
@@ -295,24 +295,16 @@ function DVDBouncingPhotos({ tiltX = 0, tiltY = 0, shakeX = 0, shakeY = 0 }) {
         const boundsW = rect.width || window.innerWidth
         const boundsH = rect.height || window.innerHeight
 
-        const { tiltX, tiltY, shakeX, shakeY } = gyroRef.current
+        const { tiltX, tiltY } = gyroRef.current
 
         itemsRef.current.forEach((item, idx) => {
           // Accelerate based on gyroscope tilt
-          item.vx += tiltX * 0.06
-          item.vy += tiltY * 0.06
-
-          // Physical Shake Impulse Transfer
-          if (shakeX !== 0 || shakeY !== 0) {
-            item.vx += shakeX * 2.5 + (Math.random() - 0.5) * 4
-            item.vy += shakeY * 2.5 + (Math.random() - 0.5) * 4
-            item.rot += (Math.random() - 0.5) * 25
-          }
+          item.vx += tiltX * 0.08
+          item.vy += tiltY * 0.08
 
           // Dynamic speed limits
-          const isShaking = shakeX !== 0 || shakeY !== 0
-          const maxSpeed = isShaking ? 8.0 : 3.2
-          const minSpeed = isShaking ? 2.5 : 0.8
+          const maxSpeed = 3.5
+          const minSpeed = 0.8
 
           const speed = Math.hypot(item.vx, item.vy)
           if (speed > maxSpeed) {
@@ -348,10 +340,10 @@ function DVDBouncingPhotos({ tiltX = 0, tiltY = 0, shakeX = 0, shakeY = 0 }) {
             item.vy = -Math.abs(item.vy)
           }
 
-          // Direct DOM transform mutation (0 React re-renders)
+          // Direct DOM transform mutation with 3D tilt (0 React re-renders)
           const el = cardRefs.current[idx]
           if (el) {
-            el.style.transform = `translate3d(${item.x}px, ${item.y}px, 0) rotate(${item.rot}deg)`
+            el.style.transform = `translate3d(${item.x}px, ${item.y}px, 0) rotateY(${tiltX * 12}deg) rotateX(${-tiltY * 10}deg) rotate(${item.rot}deg)`
           }
         })
       }
@@ -386,7 +378,7 @@ function DVDBouncingPhotos({ tiltX = 0, tiltY = 0, shakeX = 0, shakeY = 0 }) {
 export default function HeroSection() {
   const numberRef = useRef(null)
   const countdown = useCountdown()
-  const { tiltX, tiltY, shakeX, shakeY } = useGyroscope()
+  const { tiltX, tiltY } = useGyroscope()
 
   const [crackCount, setCrackCount] = useState(0)
   const [isRevealed, setIsRevealed] = useState(false)
@@ -427,8 +419,8 @@ export default function HeroSection() {
       <div className={styles.vignette} />
       <div className="noise-overlay" />
 
-      {/* Floating DVD Bouncing 3 Photos with Gyro Tilt & Shake Physics */}
-      <DVDBouncingPhotos tiltX={tiltX} tiltY={tiltY} shakeX={shakeX} shakeY={shakeY} />
+      {/* Floating DVD Bouncing 3 Photos with Gyro Tilt Physics */}
+      <DVDBouncingPhotos tiltX={tiltX} tiltY={tiltY} />
 
       {/* Gyroscope-driven Parallax Decorators */}
       <div

@@ -2,6 +2,7 @@ import { useRef, useState, useEffect, useCallback, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SvgSparkle, SvgRose } from './Assets'
+import useGyroscope from '../hooks/useGyroscope'
 import styles from './Gallery3D.module.css'
 import { PHOTOS } from '../data/photos'
 
@@ -46,6 +47,8 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
   const [windowWidth, setWindowWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 800))
   const isCooldown = useRef(false)
   const touchStartPos = useRef(0)
+
+  const { tiltX, tiltY } = useGyroscope()
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth)
@@ -131,7 +134,14 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
         </div>
       )}
 
-      <div className={styles.header}>
+      {/* Header with 3D Gyroscope Perspective */}
+      <div
+        className={styles.header}
+        style={{
+          transform: `perspective(800px) rotateY(${tiltX * 12}deg) rotateX(${-tiltY * 10}deg)`,
+          transition: 'transform 0.1s ease-out',
+        }}
+      >
         <motion.p
           className={styles.preLabel}
           initial={{ opacity: 0, y: -10 }}
@@ -166,7 +176,14 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
         </span>
       </div>
 
-      <div className={styles.trackViewport}>
+      {/* 3D Track Viewport with Gyro Tilt */}
+      <div
+        className={styles.trackViewport}
+        style={{
+          transform: `perspective(1000px) rotateY(${tiltX * 14}deg) rotateX(${-tiltY * 10}deg)`,
+          transition: 'transform 0.12s ease-out',
+        }}
+      >
         {/* Navigation Arrows for Mobile & Touch */}
         {photoIndex > 0 && (
           <button
@@ -205,7 +222,7 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
                 key={photo.id}
                 className={`${styles.card3d} ${isCentered ? styles.cardActive : ''}`}
                 style={{
-                  transform: `perspective(1000px) rotateY(${rotateY}deg) scale(${scale})`,
+                  transform: `perspective(1000px) rotateY(${rotateY + tiltX * 8}deg) rotateX(${-tiltY * 6}deg) scale(${scale})`,
                   opacity,
                 }}
                 whileHover={isCentered ? { scale: scale * 1.04 } : {}}

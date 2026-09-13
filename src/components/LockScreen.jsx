@@ -73,7 +73,7 @@ export default function LockScreen({ onUnlock }) {
   const [isUnlocking, setIsUnlocking] = useState(false)
   const canvasRef = useRef(null)
   const animFrameRef = useRef(null)
-  const { requestPermission } = useGyroscope()
+  const { tiltX, tiltY, requestPermission } = useGyroscope()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -130,7 +130,13 @@ export default function LockScreen({ onUnlock }) {
           <div className={styles.roseTop}><SvgRose size={36} /></div>
           <div className={styles.roseBottom}><SvgRose size={36} /></div>
 
-          <div className={styles.centerContent}>
+          <div
+            className={styles.centerContent}
+            style={{
+              transform: `perspective(800px) rotateY(${tiltX * 12}deg) rotateX(${-tiltY * 10}deg)`,
+              transition: 'transform 0.12s ease-out',
+            }}
+          >
             <motion.div
               className={styles.dateBadge}
               initial={{ opacity: 0, y: -20 }}
