@@ -1,0 +1,391 @@
+.hero {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--maroon-900);
+}
+
+.sceneWrapper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 80% at 50% 50%, transparent 10%, rgba(26,5,7,0.45) 65%, var(--maroon-900) 100%),
+    linear-gradient(to bottom, rgba(26,5,7,0.2) 0%, transparent 15%, transparent 85%, rgba(26,5,7,0.7) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Floaters ── */
+.floater {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  animation: float 5s ease-in-out infinite;
+  opacity: 0.65;
+  filter: drop-shadow(0 0 6px rgba(169,22,42,0.5));
+}
+
+.sparkleRing {
+  position: absolute;
+  color: var(--gold-400);
+  font-size: 1rem;
+  opacity: 0.35;
+  z-index: 2;
+  pointer-events: none;
+  animation: spin-slow 8s linear infinite;
+}
+.sparkleRingLg {
+  position: absolute;
+  color: var(--maroon-300);
+  font-size: 1.6rem;
+  opacity: 0.2;
+  z-index: 2;
+  pointer-events: none;
+  animation: spin-slow 14s linear infinite reverse;
+}
+
+/* ─────────────────────────────────────────────
+   JELLY PHOTO
+   ───────────────────────────────────────────── */
+.draggablePhoto {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.draggablePhoto:active { cursor: grabbing; }
+
+.photoInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.photoFrame {
+  width: clamp(60px, 15vw, 95px);
+  height: clamp(80px, 19vw, 120px);
+  border-radius: 42px;
+  overflow: hidden;
+  position: relative;
+  border: 2.5px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 0 25px rgba(255, 255, 255, 0.3),
+    0 0 70px rgba(125, 18, 39, 0.4),
+    inset 0 0 20px rgba(0,0,0,0.4);
+  background: var(--maroon-700);
+}
+
+.photoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  pointer-events: none;
+}
+
+.photoPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photoPlaceholder::after {
+  content: '🌹';
+  font-size: 2rem;
+}
+
+.photoGlow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(169,22,42,0.45) 100%);
+  pointer-events: none;
+}
+
+.photoCaption {
+  font-family: var(--font-script);
+  font-size: 0.72rem;
+  color: var(--gold-400);
+  text-shadow: 0 0 10px rgba(255,215,0,0.5);
+  pointer-events: none;
+}
+
+.photoDragHint {
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  color: var(--blush-500);
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+/* ─────────────────────────────────────────────
+   JELLY HAMMER
+   ───────────────────────────────────────────── */
+.hammer {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+.hammer:active { cursor: grabbing; }
+
+.hammerInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.hammerEmoji {
+  font-size: clamp(2.4rem, 7.5vw, 3.3rem);
+  filter:
+    drop-shadow(0 0 14px rgba(255,215,0,0.45))
+    drop-shadow(0 5px 14px rgba(0,0,0,0.6));
+  transform-origin: bottom right;
+  transition: filter 0.2s;
+}
+.hammer:hover .hammerEmoji {
+  filter:
+    drop-shadow(0 0 22px rgba(255,215,0,0.7))
+    drop-shadow(0 5px 18px rgba(0,0,0,0.6));
+}
+
+.hammerGlow {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,215,0,0.28) 0%, transparent 70%);
+  top: 0;
+  pointer-events: none;
+  animation: breathe 2.2s ease-in-out infinite;
+}
+
+.hammerLabel {
+  font-family: var(--font-body);
+  font-size: 0.58rem;
+  color: var(--gold-400);
+  opacity: 0.6;
+  letter-spacing: 0.04em;
+  margin-top: 0.2rem;
+  text-shadow: 0 0 8px rgba(255,215,0,0.5);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Impact flash */
+.impactFlash {
+  position: fixed;
+  font-size: 2.5rem;
+  transform: translate(-50%, -50%);
+  z-index: 200;
+  pointer-events: none;
+  filter: drop-shadow(0 0 20px rgba(255,100,0,0.9));
+}
+
+/* ─────────────────────────────────────────────
+   HERO CONTENT
+   ───────────────────────────────────────────── */
+.content {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.6rem;
+  padding: 2rem 1.5rem;
+  max-width: 430px;
+  width: 100%;
+  pointer-events: none;
+}
+.content > * { pointer-events: auto; }
+
+.topLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+  opacity: 0.8;
+}
+.labelDot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  flex-shrink: 0;
+}
+
+/* 3D text */
+.text3dWrapper { perspective: 700px; }
+
+.text3dWord {
+  display: inline-block;
+  animation: text3d-enter 0.85s both;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.greeting {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 5.2vw, 2.3rem);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--blush-400);
+  text-shadow: 0 0 30px rgba(245,194,199,0.3);
+  animation: text3d-float 6s ease-in-out infinite 1.5s;
+  transform-style: preserve-3d;
+}
+
+.ageLabel {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--blush-500);
+  opacity: 0.65;
+  letter-spacing: 0.04em;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 3.5vw, 1.45rem);
+  font-weight: 600;
+  color: var(--blush-300);
+  animation: text3d-enter 0.8s 1.4s both;
+}
+
+.countdownBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.38rem 1rem;
+  border-radius: 100px;
+  background: rgba(107,15,26,0.5);
+  border: 1px solid rgba(169,22,42,0.4);
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--blush-400);
+  backdrop-filter: blur(8px);
+}
+.countdownToday {
+  background: rgba(255,215,0,0.1);
+  border-color: rgba(255,215,0,0.4);
+  color: var(--gold-400);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.scrollCue {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1.2rem;
+  font-family: var(--font-body);
+  font-size: 0.63rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blush-500);
+  opacity: 0.4;
+}
+.scrollLine {
+  width: 26px; height: 1px;
+  background: linear-gradient(to right, transparent, var(--blush-500));
+}
+.scrollLine:last-child {
+  background: linear-gradient(to left, transparent, var(--blush-500));
+}
+
+/* Bottom deco */
+.bottomDeco {
+  position: absolute;
+  bottom: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 3;
+  pointer-events: none;
+}
+.bottomDeco span {
+  font-size: 0.85rem;
+  animation: star-twinkle 2.2s ease-in-out infinite;
+  opacity: 0.55;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .hammer { bottom: 5.5rem; left: 0.5rem; }
+  .hammerEmoji { font-size: 2.6rem; }
+  .draggablePhoto { top: 3rem; right: 0.3rem; }
+  .content { max-width: 100%; padding: 1.2rem 0.8rem; }
+  .floater { opacity: 0.38; }
+}
+
+/* ─────────────────────────────────────────────
+   DVD FLOATING BOUNCING PHOTOS
+   ───────────────────────────────────────────── */
+.dvdLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dvdCard {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(75px, 14vw, 110px);
+  height: clamp(95px, 18vw, 140px);
+  border-radius: 16px;
+  padding: 5px;
+  background: rgba(42, 8, 15, 0.85);
+  border: 1.5px solid var(--accentColor, rgba(255, 255, 255, 0.7));
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 15px var(--accentColor, rgba(255, 255, 255, 0.3));
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+  will-change: transform;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dvdImgWrapper {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dvdImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.dvdCaption {
+  font-family: var(--font-script);
+  font-size: 0.62rem;
+  color: var(--gold-400);
+  margin-top: 4px;
+  white-space: nowrap;
+  opacity: 0.9;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+}
+

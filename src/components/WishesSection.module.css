@@ -1,0 +1,199 @@
+.section {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--maroon-950);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1.5rem 4rem;
+  overflow: hidden;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--maroon-400), transparent);
+}
+
+/* Decorative background blobs */
+.bgDeco1 {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(107, 15, 26, 0.25) 0%, transparent 70%);
+  top: -50px;
+  left: -100px;
+  pointer-events: none;
+}
+
+.bgDeco2 {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(169, 22, 42, 0.15) 0%, transparent 70%);
+  bottom: 50px;
+  right: -80px;
+  pointer-events: none;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  z-index: 2;
+}
+
+.preLabel {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: var(--maroon-300);
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  color: var(--blush-300);
+  line-height: 1.2;
+}
+
+.title em {
+  font-style: italic;
+  color: #FFFFFF;
+}
+
+/* Letter Card */
+.letterCard {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  background: linear-gradient(145deg, #1E0409 0%, #150306 50%, #1E0409 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  padding: 2.2rem 1.8rem 1.8rem;
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  z-index: 2;
+}
+
+/* Wax seal */
+.waxSeal {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--maroon-500) 0%, var(--maroon-600) 100%);
+  border: 2.5px solid #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Corner roses */
+.cornerRose {
+  position: absolute;
+  opacity: 0.3;
+}
+
+.topLeft    { top: 1rem; left: 1rem; }
+.bottomRight { bottom: 1rem; right: 1rem; }
+
+/* Letter content */
+.letterContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.letterLine {
+  font-family: var(--font-body);
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+  line-height: 1.75;
+}
+
+/* Text type variations */
+.salutation {
+  font-family: var(--font-script);
+  font-size: clamp(1.3rem, 4vw, 1.6rem) !important;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.body {
+  color: #F8F9FA;
+}
+
+.closing {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--blush-300);
+  font-size: 1em !important;
+  margin-top: 0.4rem;
+}
+
+.signature {
+  font-family: var(--font-script);
+  font-size: clamp(1rem, 3.5vw, 1.3rem) !important;
+  color: var(--maroon-300);
+  text-align: right;
+  font-weight: 600;
+}
+
+/* Typewriter */
+.typeText {
+  display: inline;
+}
+
+.cursor {
+  display: inline-block;
+  animation: typewriter-cursor 0.8s ease-in-out infinite;
+  color: var(--gold-400);
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+/* Skip/Show All Button */
+.showAllBtn {
+  margin-top: 1rem;
+  align-self: center;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+  color: var(--gold-300);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.35rem 0.8rem;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.showAllBtn:hover {
+  background: var(--gold-500);
+  color: #1A0409;
+}
