@@ -6,10 +6,10 @@ import useGyroscope from '../hooks/useGyroscope'
 import styles from './Gallery3D.module.css'
 import { PHOTOS } from '../data/photos'
 
-// 3D Background Particles
-function Background3DParticles() {
+// 3D Background Particles with Gyroscope Camera Movement
+function Background3DParticles({ tiltX = 0, tiltY = 0 }) {
   const meshRef = useRef()
-  const count = 80
+  const count = 90
   const positions = useRef(
     new Float32Array(count * 3).map((_, i) =>
       i % 3 === 2 ? (Math.random() - 0.5) * 6 : (Math.random() - 0.5) * 10
@@ -18,8 +18,14 @@ function Background3DParticles() {
 
   useFrame((state) => {
     if (!meshRef.current) return
+    // Smooth ambient rotation
     meshRef.current.rotation.y = state.clock.elapsedTime * 0.04
     meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.03) * 0.05
+
+    // Smooth camera depth reaction to gyroscope tilt
+    state.camera.position.x += (tiltX * 0.8 - state.camera.position.x) * 0.08
+    state.camera.position.y += (-tiltY * 0.6 - state.camera.position.y) * 0.08
+    state.camera.lookAt(0, 0, 0)
   })
 
   return (
@@ -31,10 +37,10 @@ function Background3DParticles() {
         />
       </bufferGeometry>
       <pointsMaterial
-        size={0.065}
-        color="#FFFFFF"
+        size={0.07}
+        color="#FFD700"
         transparent
-        opacity={0.6}
+        opacity={0.65}
         sizeAttenuation
       />
     </points>
@@ -121,27 +127,21 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
 
   return (
     <div id="gallery-page-container" className={styles.stickyInner}>
-      {/* 3D Canvas - Only active when Gallery page is currently open */}
+      {/* 3D Canvas Background driven by Gyroscope */}
       {isActive && (
         <div className={styles.canvasContainer}>
           <Canvas camera={{ position: [0, 0, 5], fov: 50 }} gl={{ alpha: true, antialias: false, powerPreference: 'low-power' }}>
             <Suspense fallback={null}>
               <ambientLight intensity={0.4} />
               <pointLight position={[2, 3, 4]} intensity={1.2} color="#FFFFFF" />
-              <Background3DParticles />
+              <Background3DParticles tiltX={tiltX} tiltY={tiltY} />
             </Suspense>
           </Canvas>
         </div>
       )}
 
-      {/* Header with 3D Gyroscope Perspective */}
-      <div
-        className={styles.header}
-        style={{
-          transform: `perspective(800px) rotateY(${tiltX * 12}deg) rotateX(${-tiltY * 10}deg)`,
-          transition: 'transform 0.1s ease-out',
-        }}
-      >
+      {/* Header */}
+      <div className={styles.header}>
         <motion.p
           className={styles.preLabel}
           initial={{ opacity: 0, y: -10 }}
@@ -176,14 +176,8 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
         </span>
       </div>
 
-      {/* 3D Track Viewport with Gyro Tilt */}
-      <div
-        className={styles.trackViewport}
-        style={{
-          transform: `perspective(1000px) rotateY(${tiltX * 14}deg) rotateX(${-tiltY * 10}deg)`,
-          transition: 'transform 0.12s ease-out',
-        }}
-      >
+      {/* Track Viewport */}
+      <div className={styles.trackViewport}>
         {/* Navigation Arrows for Mobile & Touch */}
         {photoIndex > 0 && (
           <button
@@ -222,7 +216,7 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
                 key={photo.id}
                 className={`${styles.card3d} ${isCentered ? styles.cardActive : ''}`}
                 style={{
-                  transform: `perspective(1000px) rotateY(${rotateY + tiltX * 8}deg) rotateX(${-tiltY * 6}deg) scale(${scale})`,
+                  transform: `perspective(1000px) rotateY(${rotateY + (isCentered ? tiltX * 3 : 0)}deg) rotateX(${isCentered ? -tiltY * 3 : 0}deg) scale(${scale})`,
                   opacity,
                 }}
                 whileHover={isCentered ? { scale: scale * 1.04 } : {}}
@@ -238,6 +232,12 @@ export default function Gallery3D({ onNextPage, onPrevPage, initialPhotoIndex = 
                       src={photo.src}
                       alt={`Foto #${photo.id}`}
                       className={styles.photoImg}
+                      style={{
+                        transform: isCentered
+                          ? `scale(1.08) translate3d(${tiltX * -10}px, ${tiltY * -10}px, 0)`
+                          : 'scale(1)',
+                        transition: 'transform 0.15s ease-out',
+                      }}
                       loading="lazy"
                       onError={(e) => {
                         e.target.style.display = 'none'
