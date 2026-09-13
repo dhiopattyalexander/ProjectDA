@@ -87,10 +87,8 @@ export default function App() {
     }
   }, [unlocked, pageIndex, goToPage])
 
-  const globalRotateY = tiltX * 5 + shakeX * 4
-  const globalRotateX = -tiltY * 4 - shakeY * 4
-  const globalTranslateX = tiltX * 6 + shakeX * 10
-  const globalTranslateY = tiltY * 6 + shakeY * 10
+  const globalTranslateX = tiltX * 5 + shakeX * 8
+  const globalTranslateY = tiltY * 5 + shakeY * 8
 
   return (
     <div className="app-viewport">
@@ -100,7 +98,7 @@ export default function App() {
         <div
           className="page-slider-container"
           style={{
-            transform: `perspective(1000px) rotateY(${globalRotateY}deg) rotateX(${globalRotateX}deg) translate3d(${globalTranslateX}px, ${globalTranslateY}px, 0)`,
+            transform: `translate3d(${globalTranslateX}px, ${globalTranslateY}px, 0)`,
             transition: (shakeX !== 0 || shakeY !== 0) ? 'transform 0.1s cubic-bezier(0.1, 0.9, 0.2, 1.2)' : 'transform 0.15s ease-out',
           }}
         >
