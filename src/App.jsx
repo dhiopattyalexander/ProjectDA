@@ -23,7 +23,7 @@ export default function App() {
   const isTransitioning = useRef(false)
   const touchStartPos = useRef(0)
 
-  const { tiltX, tiltY, shakeX, shakeY } = useGyroscope()
+  const { tiltX, tiltY } = useGyroscope()
 
   const goToPage = useCallback((targetIndex, initialPhoto = 0) => {
     if (targetIndex < 0 || targetIndex >= PAGES.length) return
@@ -87,8 +87,8 @@ export default function App() {
     }
   }, [unlocked, pageIndex, goToPage])
 
-  const globalTranslateX = tiltX * 5 + shakeX * 8
-  const globalTranslateY = tiltY * 5 + shakeY * 8
+  const globalTranslateX = (tiltX || 0) * 5
+  const globalTranslateY = (tiltY || 0) * 5
 
   return (
     <div className="app-viewport">
@@ -99,7 +99,7 @@ export default function App() {
           className="page-slider-container"
           style={{
             transform: `translate3d(${globalTranslateX}px, ${globalTranslateY}px, 0)`,
-            transition: (shakeX !== 0 || shakeY !== 0) ? 'transform 0.1s cubic-bezier(0.1, 0.9, 0.2, 1.2)' : 'transform 0.15s ease-out',
+            transition: 'transform 0.15s ease-out',
           }}
         >
           {/* Stacked Paper Layers System */}
