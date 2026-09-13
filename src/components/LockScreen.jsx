@@ -67,11 +67,13 @@ class Particle {
   }
 }
 
+import useGyroscope from '../hooks/useGyroscope'
+
 export default function LockScreen({ onUnlock }) {
-  const canvasRef = useRef(null)
-  const particlesRef = useRef([])
-  const animFrameRef = useRef(null)
   const [isUnlocking, setIsUnlocking] = useState(false)
+  const canvasRef = useRef(null)
+  const animFrameRef = useRef(null)
+  const { requestPermission } = useGyroscope()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -81,14 +83,15 @@ export default function LockScreen({ onUnlock }) {
     const resize = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
-      particlesRef.current = Array.from({ length: 120 }, () => new Particle(canvas))
     }
     resize()
     window.addEventListener('resize', resize)
 
+    const particles = Array.from({ length: 45 }, () => new Particle(canvas))
+
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height)
-      particlesRef.current.forEach(p => {
+      particles.forEach((p) => {
         p.update()
         p.draw(ctx)
       })
@@ -102,8 +105,11 @@ export default function LockScreen({ onUnlock }) {
     }
   }, [])
 
-  const handleUnlock = () => {
+  const handleUnlock = async () => {
     if (isUnlocking) return
+    if (requestPermission) {
+      await requestPermission()
+    }
     setIsUnlocking(true)
     setTimeout(onUnlock, 1200)
   }
